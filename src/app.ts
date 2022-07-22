@@ -13,18 +13,6 @@ type Items = {
   Height: number;
   IsStackable: boolean;
 };
-const items = [
-  { Length: 50, Width: 20, Height: 20, IsStackable: true },
-  { Length: 50, Width: 20, Height: 20, IsStackable: true },
-  { Length: 20, Width: 20, Height: 20, IsStackable: false },
-  { Length: 20, Width: 20, Height: 20, IsStackable: false },
-  { Length: 20, Width: 20, Height: 20, IsStackable: false },
-  { Length: 20, Width: 20, Height: 20, IsStackable: false },
-  { Length: 20, Width: 20, Height: 20, IsStackable: false },
-  { Length: 20, Width: 20, Height: 20, IsStackable: false },
-  { Length: 20, Width: 20, Height: 20, IsStackable: false },
-  { Length: 20, Width: 20, Height: 20, IsStackable: false },
-];
 
 //Assumptions:
 //Items are sent in decending order
@@ -34,7 +22,7 @@ const items = [
 //If an item is un-stackable it is ordered below stackable
 //Items can be slanted when stacked
 
-function CalculatePalletsCount(items: Items[]) {
+function CalculatePalletsCount(items: Items[]): Number {
   let pallets = 1;
   let avaiableBase = 48 * 48;
   let availableHeight = 48;
@@ -106,11 +94,10 @@ app.get("/", (req, res) => {
   res.send('Send items to "/countPallets"');
 });
 
-app.get("/countPallets", (req: Request, res: Response) => {
-  const data = JSON.parse(req.body);
-  console.log(req.body); //TODO: find a way to send items
-  res.json(CalculatePalletsCount(items));
-}); //TODO: req/res type
+app.put("/countPallets", (req: Request, res: Response) => {
+  console.log(req.body);
+  res.json(CalculatePalletsCount(req.body));
+});
 
 app.listen(port, () => {
   return console.log(`Express is listening at http://localhost:${port}`);
