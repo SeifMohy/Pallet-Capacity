@@ -110,7 +110,14 @@ app.get("/", (req, res) => {
 });
 
 app.put("/countPallets", (req: Request, res: Response) => {
-  res.json(CalculatePalletsCount(SortPallets(req.body), palletSize));
+  try {
+    res.json(CalculatePalletsCount(SortPallets(req.body), palletSize));
+  } catch (error) {
+    res.json(
+      "Please provide items in an array of objects with keys of Length, Width, and Height as a number and IsStackable as a boolean. For example: `[{ 'Length': 20, 'Width': 20, 'Height': 20, 'IsStackable': false }]` "
+    );
+    console.log(error);
+  }
 });
 
 app.listen(port, () => {
