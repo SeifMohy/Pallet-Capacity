@@ -14,6 +14,12 @@ type Items = {
   IsStackable: boolean;
 };
 
+type PalletSize = {
+  Length: number;
+  Width: number;
+  Height: number;
+};
+
 //Assumptions:
 //Items are sent in decending order
 //Items are stacked according to sent order
@@ -22,67 +28,66 @@ type Items = {
 //If an item is un-stackable it is ordered below stackable
 //Items can be slanted when stacked
 
-function CalculatePalletsCount(items: Items[]): Number {
+const palletSize = { Length: 48, Width: 48, Height: 48 };
+
+function CalculatePalletsCount(items: Items[], palletSize: PalletSize): Number {
+  const palletArea = palletSize.Length * palletSize.Width;
+  const palletHeight = palletSize.Height;
+  let avaiableArea = palletArea;
+  let availableHeight = palletHeight;
   let pallets = 1;
-  let avaiableBase = 48 * 48;
-  let availableHeight = 48;
 
   for (let i = 0; i < items.length; i++) {
+    const itemBaseArea = items[i].Length * items[i].Width;
     let maxHeight = 0;
     if (items[i].Height > maxHeight) {
       maxHeight = items[i].Height;
       console.log("maxHeight", maxHeight);
     }
     if (
-      items[i].Length * items[i].Width > avaiableBase &&
+      itemBaseArea > avaiableArea &&
       availableHeight > items[i].Height &&
       items[i - 1].IsStackable === true
     ) {
       if (items[i].IsStackable === true) {
-        avaiableBase = 48 * 48;
+        avaiableArea = palletArea;
         availableHeight -= maxHeight;
         console.log(
           "resetting with height stackable",
-          avaiableBase,
+          avaiableArea,
           availableHeight
         );
       } else {
         //not stackable
-        avaiableBase = 48 * 48;
+        avaiableArea = palletArea;
         availableHeight = items[i].Height;
         console.log(
           "resetting with height unstackable",
-          avaiableBase,
+          avaiableArea,
           availableHeight
         );
       }
     }
     if (items[i].IsStackable === true) {
-      if (
-        items[i].Length * items[i].Width <= avaiableBase &&
-        items[i].Height <= availableHeight
-      ) {
-        avaiableBase -= items[i].Length * items[i].Width;
-        console.log("availBase", avaiableBase);
+      if (itemBaseArea <= avaiableArea && items[i].Height <= availableHeight) {
+        avaiableArea -= itemBaseArea;
+        console.log("availBase", avaiableArea);
       } else {
         console.log("adding pallet");
         pallets++;
-        avaiableBase = 48 * 48;
-        availableHeight = 48;
+        avaiableArea = palletArea;
+        availableHeight = palletHeight;
       }
     } else {
       //not stackable
-      if (
-        items[i].Length * items[i].Width <= avaiableBase &&
-        items[i].Height <= availableHeight
-      ) {
-        avaiableBase -= items[i].Length * items[i].Width;
-        console.log("availBase", avaiableBase);
+      if (itemBaseArea <= avaiableArea && items[i].Height <= availableHeight) {
+        avaiableArea -= itemBaseArea;
+        console.log("availBase", avaiableArea);
       } else {
         console.log("adding pallet");
         pallets++;
-        avaiableBase = 48 * 48;
-        availableHeight = 48;
+        avaiableArea = palletArea;
+        availableHeight = palletHeight;
       }
     }
   }
@@ -96,7 +101,7 @@ app.get("/", (req, res) => {
 
 app.put("/countPallets", (req: Request, res: Response) => {
   console.log(req.body);
-  res.json(CalculatePalletsCount(req.body));
+  res.json(CalculatePalletsCount(req.body, palletSize));
 });
 
 app.listen(port, () => {
