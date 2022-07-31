@@ -1,7 +1,8 @@
 //Assumptions:
 //Items will always fit avaiable pallet space
-//Minimum amounts of pallets is 1
+//Minimum amount of pallets is 1
 //Items can be slanted when stacked
+//Items are sorted according to decreasing bottom area and if IsStackable
 
 import express from "express";
 import { Request, Response, json, urlencoded } from "express";
@@ -9,8 +10,8 @@ import { Request, Response, json, urlencoded } from "express";
 const app = express();
 const port = 3000;
 
-app.use(json()); //express
-app.use(urlencoded({ extended: true })); //express
+app.use(json());
+app.use(urlencoded({ extended: true }));
 
 type Items = {
   Length: number;
@@ -29,11 +30,11 @@ const palletSize = { Length: 48, Width: 48, Height: 48 };
 function SortPallets(items: Items[]): Items[] {
   const stackableItems = items.filter((item) => item.IsStackable === true);
   const sortedstackableItems = stackableItems.sort(
-    (a: Items, b: Items) => b.Length - a.Length
+    (a: Items, b: Items) => b.Length * b.Width - a.Length * b.Width
   );
   const nonStackableItems = items.filter((item) => item.IsStackable === false);
   const sortedNonStackableItems = nonStackableItems.sort(
-    (a: Items, b: Items) => b.Length - a.Length
+    (a: Items, b: Items) => b.Length * b.Width - a.Length * b.Width
   );
 
   const sortedItems = sortedstackableItems.concat(sortedNonStackableItems);
@@ -106,7 +107,7 @@ function CalculatePalletsCount(items: Items[], palletSize: PalletSize): Number {
 }
 
 app.get("/", (req, res) => {
-  res.send('Send items to "/countPallets"');
+  res.send('Put items to "/countPallets"');
 });
 
 app.put("/countPallets", (req: Request, res: Response) => {
